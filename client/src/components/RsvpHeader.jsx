@@ -7,7 +7,10 @@ const RsvpHeader = () => {
       <h1 className="text-5xl md:text-6xl font-extrabold font-greatVibes tracking-wide leading-tight">
         You're Invited
       </h1>
-      <p className="text-lg md:text-2xl mt-4">
+      <p
+        className="text-lg md:text-2xl mt-4"
+        style={{ fontFamily: "'Dancing Script', cursive" }}
+      >
         Join us for our special day. Kindly confirm your attendance below.
       </p>
     </div>

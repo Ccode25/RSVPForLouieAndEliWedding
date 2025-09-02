@@ -2,15 +2,15 @@ import React from "react";
 
 const Button = ({ label, onClick }) => {
   return (
-    <div>
+    <div className="flex justify-center">
       <button
         type="button"
-        className="w-full py-3 text-white font-bold rounded-lg transition-transform transform hover:scale-105"
-        style={{ backgroundColor: "#C8692C" }}
+        className="w-full md:w-64 py-3 text-base font-semibold text-white rounded-full shadow-md 
+                   bg-gradient-to-r from-[#C8692C] to-[#a0521f]
+                   transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
         onClick={onClick}
       >
-        {" "}
-        {label}{" "}
+        {label}
       </button>
     </div>
   );
