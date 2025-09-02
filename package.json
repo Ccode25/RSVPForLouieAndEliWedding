@@ -1,0 +1,17 @@
+{
+  "name": "rsvp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+    "build": "npm run build --prefix client"
+  },
+  "dependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "RSVP app with both client and server"
+}

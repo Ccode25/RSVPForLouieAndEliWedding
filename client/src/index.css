@@ -1,0 +1,13 @@
+/* src/index.css */
+@import url("https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap");
+
+/* Tailwind's default styles and your custom styles can go below this */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* In your global CSS or index.css file */
+html {
+  scroll-behavior: smooth;
+}
