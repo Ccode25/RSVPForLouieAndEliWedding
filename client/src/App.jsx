@@ -8,6 +8,7 @@ import {
 import RSVPForm from "./sections/RSVPForm";
 import EventDetails from "./sections/EventDetails";
 import Response from "./sections/Response";
+import Header from "./sections/Header"; // ✅ bring back Header
 
 // Component to handle scroll blocking based on route
 const ScrollControl = () => {
@@ -34,6 +35,7 @@ const App = () => {
     <Router>
       <ScrollControl /> {/* Scroll behavior controller */}
       <div className="scroll-smooth">
+        <Header /> {/* ✅ Header restored */}
         <Routes>
           <Route
             path="/"
