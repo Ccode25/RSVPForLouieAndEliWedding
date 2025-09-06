@@ -20,8 +20,9 @@ const supabase = createClient(
 
 const allowedOrigins = [
   "http://localhost:5173", // Allow frontend during development
-  "https://rsvp-for-louie-and-eli-wedding.vercel.app", // Correct the frontend URL to the correct one
-  // "https://wedding-rsvp-9ynq.vercel.app", // Allow deployed frontend if needed
+  "https://rsvp-for-louie-and-eli-wedding-bls34gs8e-ccodes-projects.vercel.app",
+  "https://rsvp-for-louie-and-eli-wedding.vercel.app",
+  "https://rsvp-for-louie-and-eli-wedding-lraj.vercel.app",
 ];
 
 app.use(
