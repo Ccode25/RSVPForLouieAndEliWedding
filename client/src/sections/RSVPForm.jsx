@@ -23,7 +23,8 @@ const RSVPForm = () => {
   const [showAddNameModal, setShowAddNameModal] = useState(false);
 
   const readOnly = true;
-  const URL = "http://localhost:5000";
+  // const URL = "http://localhost:5000";
+  const URL = "https://rsvp-for-louie-and-eli-wedding-lraj.vercel.app";
 
   const guestListBaseNames = [
     "Kharllo Miguel Pernetes",
