@@ -30,10 +30,18 @@ const AddName = ({ mainGuestId, onGuestAdded }) => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5000/addName", {
-        guestName: guestName.trim(),
-        mainGuestId, // associate with main guest
-      });
+      // const response = await axios.post("http://localhost:5000/addName", {
+      //   guestName: guestName.trim(),
+      //   mainGuestId, // associate with main guest
+      // });
+
+      const response = await axios.post(
+        "https://rsvp-for-louie-and-eli-wedding-lraj.vercel.app/addName",
+        {
+          guestName: guestName.trim(),
+          mainGuestId, // associate with main guest
+        }
+      );
 
       toast.success(`Guest added successfully: ${response.data.guest}`);
       setGuestName("");
