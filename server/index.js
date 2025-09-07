@@ -187,7 +187,7 @@ app.post("/guest/decline", (req, res) =>
 );
 
 // Add plus-one guest and auto-accept with main guest's email
-app.post("/addName", async (req, res) => {
+app.post("/guest/addName", async (req, res) => {
   const { mainGuestId, guestName } = req.body; // use mainGuestId consistently
 
   if (!guestName || guestName.trim() === "") {
