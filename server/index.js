@@ -186,6 +186,72 @@ app.post("/guest/decline", (req, res) =>
   handleGuestResponse(req, res, "decline")
 );
 
+// Add plus-one guest and auto-accept with main guest's email
+app.post("/addName", async (req, res) => {
+  const { mainGuestId, guestName } = req.body; // use mainGuestId consistently
+
+  if (!guestName || guestName.trim() === "") {
+    return res.status(400).json({ error: "Guest name is required." });
+  }
+
+  if (!mainGuestId) {
+    return res.status(400).json({ error: "Main guest ID is required." });
+  }
+
+  try {
+    // Fetch main guest to get email
+    const { data: mainGuestData, error: mainGuestError } = await supabase
+      .from("guestlist")
+      .select("email")
+      .eq("id", mainGuestId)
+      .single();
+
+    if (mainGuestError) throw new Error(mainGuestError.message);
+
+    const mainGuestEmail = mainGuestData.email;
+
+    // Check if the plus-one guest already exists
+    const { data: existingGuest, error: checkError } = await supabase
+      .from("guestlist")
+      .select("id")
+      .ilike("guest", `%${guestName.trim()}%`);
+
+    if (checkError) throw new Error(checkError.message);
+
+    if (existingGuest.length > 0) {
+      return res.status(409).json({ error: "Guest already exists." });
+    }
+
+    // Insert new guest with auto-accepted response and main guest's email
+    const { data, error } = await supabase
+      .from("guestlist")
+      .insert([
+        {
+          guest: guestName.trim(),
+          response: "accept", // automatically accepted
+          email: mainGuestEmail, // inherit main guest email
+          responded_at: new Date().toLocaleString("en-PH", {
+            timeZone: "Asia/Manila",
+          }),
+        },
+      ])
+      .select("id, guest, response, email");
+
+    if (error) throw new Error(error.message);
+
+    res.status(201).json({
+      success: true,
+      message: `Plus-one guest added and automatically accepted.`,
+      ...data[0],
+    });
+  } catch (error) {
+    console.error("Error adding plus-one guest:", error);
+    res.status(500).json({
+      error: "An error occurred while adding the plus-one guest.",
+    });
+  }
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

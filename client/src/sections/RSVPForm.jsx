@@ -1,92 +1,105 @@
+// ... other imports
 import React, { useState } from "react";
 import img from "../assets/RSVPhorizontal.jpg";
 import { FaEnvelope, FaSearch, FaUser } from "react-icons/fa";
 import RsvpHeader from "../components/RsvpHeader";
 import InputForm from "../components/InputForm";
 import Button from "../components/Button";
-import axios from "axios";
+import AddName from "../components/AddName";
 import ResponseMessage from "../components/ResponseMessage";
-import { BounceLoader } from "react-spinners";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const RSVPForm = () => {
   const [guestName, setGuestName] = useState("");
-  const [guest, setGuest] = useState([]); // Holds the list of guests
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [guest, setGuest] = useState([]);
+  const [loadingGuests, setLoadingGuests] = useState({});
   const [searchPerformed, setSearchPerformed] = useState(false);
-  const [responseReceived, setResponseReceived] = useState(false); // Track if response is received
-  const [isAttending, setIsAttending] = useState(null); // Track if the guest is attending or not
-  const [selectedGuestId, setSelectedGuestId] = useState(null); // Track selected guest for response
-  const [guestEmails, setGuestEmails] = useState({}); // Track emails for each guest
-  const [loadingGuests, setLoadingGuests] = useState({}); // Track loading status for each guest
+  const [responseReceived, setResponseReceived] = useState(false);
+  const [isAttending, setIsAttending] = useState(null);
+  const [selectedGuestId, setSelectedGuestId] = useState(null);
+  const [guestEmails, setGuestEmails] = useState({});
+  const [showAddNameModal, setShowAddNameModal] = useState(false);
 
   const readOnly = true;
-  const URL = "https://rsvp-for-louie-and-eli-wedding-lraj.vercel.app";
+  const URL = "http://localhost:5000";
 
+  const guestListBaseNames = [
+    "Kharllo Miguel Pernetes",
+    "Patrick Anthony Dominguez",
+    "Khristian Paul Pimentel",
+    "John Curt Pascual",
+    "Katrina Caña",
+    "John Carlos Cuadra",
+    "Kyle Phillip Laconsay",
+    "Angelo Cordero",
+    "Urberto Bulatao",
+    "Mark Jonh Bautista",
+    "Lorna Almondia",
+    "Glorina Villaluz",
+    "Marita Tamayosa",
+    "Conchita Zurita",
+    "Rowena Pangalanan",
+    "Cristina Malabanan",
+  ];
+
+  // --- Search Guest ---
   const searchGuest = async () => {
-    if (!guestName) {
-      setError("Input name required");
+    if (!guestName.trim()) {
+      toast.error("Please enter a name to search.");
       return;
     }
 
-    setLoading(true); // Set loading state before making the API call
-    setError(null);
     setSearchPerformed(true);
+    const toastId = toast.info("Searching for your name...", {
+      autoClose: false,
+    });
 
     try {
       const response = await axios.get(`${URL}/guest?guestName=${guestName}`);
-      if (response.data === 0) {
-        setError("No name found");
+      toast.dismiss(toastId);
+
+      if (!response.data || response.data.length === 0) {
+        toast.warning("No name found.");
         setSearchPerformed(false);
         return;
       }
+
       if (response.data.message) {
+        toast.info(response.data.message);
         setSearchPerformed(false);
-        setError(response.data.message);
         return;
-      } else {
-        setGuest(response.data);
-        setSearchPerformed(true);
-        setError("");
       }
-    } catch (error) {
+
+      setGuest(response.data);
+    } catch (err) {
+      toast.dismiss(toastId);
+      toast.error("Something went wrong. Please try again.");
       setGuest([]);
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false); // Set loading state to false after completion
+      setSearchPerformed(false);
     }
+  };
+
+  // --- Handle Guest Selection ---
+  const handleGuestSelect = (id) => {
+    setSelectedGuestId((prev) => (prev === id ? null : id));
   };
 
   const handleEmailChange = (e, guestId) => {
-    setGuestEmails((prevEmails) => ({
-      ...prevEmails,
-      [guestId]: e.target.value, // Update email for the specific guest by guestId
-    }));
+    setGuestEmails((prev) => ({ ...prev, [guestId]: e.target.value }));
   };
 
-  const handleInputChange = (e) => {
-    setGuestName(e.target.value);
-  };
+  const handleInputChange = (e) => setGuestName(e.target.value);
 
-  const handleGuestSelect = (id) => {
-    setSelectedGuestId((prevId) => (prevId === id ? null : id)); // Toggle selection
-  };
-
+  // --- Handle Response (Accept / Decline) ---
   const handleResponse = async (id, action, email) => {
     if (!selectedGuestId) {
-      setError("Please select a guest before responding.");
+      toast.error("Please select a guest before responding.");
       return;
     }
-
-    // Ensure the email is valid and not empty
     if (!email || !email.trim()) {
-      setError("Email is required.");
-      return;
-    }
-
-    // Ensure the guestId is also valid
-    if (!id) {
-      setError("Guest ID is invalid.");
+      toast.error("Email is required.");
       return;
     }
 
@@ -94,56 +107,60 @@ const RSVPForm = () => {
       action === "accept" ? `${URL}/guest/accept` : `${URL}/guest/decline`;
 
     try {
-      // Set the guest as loading while processing the response
       setLoadingGuests((prev) => ({ ...prev, [id]: true }));
-
-      // Make the API call
-      const response = await axios.post(url, {
-        guestId: id,
-        email: email,
-        action: action, // Ensure 'action' is passed to handle logic on the server
+      const sendingToastId = toast.info("Sending response...", {
+        autoClose: false,
       });
 
-      // If the response is successful
+      await axios.post(url, { guestId: id, email, action });
+
+      toast.dismiss(sendingToastId);
+      toast.success("Response submitted successfully!", { autoClose: 3000 });
+
       setResponseReceived(true);
       setIsAttending(action === "accept");
 
-      // Reset guest data and search state
+      const guestObj = guest.find((g) => g.id === id);
+
+      // Show AddName modal only for specific main guests
+      if (
+        action === "accept" &&
+        guestObj &&
+        guestListBaseNames.includes(guestObj.guest)
+      ) {
+        setShowAddNameModal(true); // Keep selectedGuestId for AddName
+      }
+
+      // Clear guest list but keep selectedGuestId
       setGuest([]);
-      setSearchPerformed(false);
-      setError(null);
-    } catch (error) {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      toast.dismiss();
+      toast.error("Something went wrong. Please try again.");
     } finally {
-      // Set loading state to false after completion
       setLoadingGuests((prev) => ({ ...prev, [id]: false }));
     }
   };
 
+  // --- Reset Search ---
   const resetSearch = () => {
     setGuest([]);
     setResponseReceived(false);
     setSearchPerformed(false);
     setGuestName("");
     setSelectedGuestId(null);
-    setError(null); // Clear any errors
+    setShowAddNameModal(false);
+    setIsAttending(null);
   };
 
   return (
     <div
       className="relative min-h-screen flex items-center justify-center bg-cover bg-center"
-      style={{
-        backgroundImage: `url(${img})`,
-      }}
+      style={{ backgroundImage: `url(${img})` }}
     >
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-
-      {/* Form Content */}
       <div className="relative z-10 w-full max-w-4xl text-white px-6 mt-10">
         <RsvpHeader />
         <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
-          {/* Conditional Rendering for Input and Search */}
           {!searchPerformed && !responseReceived && (
             <>
               <InputForm
@@ -157,25 +174,13 @@ const RSVPForm = () => {
                 className="w-full bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
                 onChange={handleInputChange}
               />
-
-              <Button
-                label="Find"
-                onClick={searchGuest}
-                disabled={loading} // Disable button while loading
-              />
-
+              <Button label="Find" onClick={searchGuest} />
               <p className="text-xs sm:text-sm text-gray-300 mt-24">
                 Please search for your name and let us know if you can make it
                 or not. Thank you!
               </p>
             </>
           )}
-
-          {loading && (
-            <div className="text-center text-2xl font-bold">Searching...</div>
-          )}
-
-          {error && <p className="mt-4 text-red-500 text-xl">{error}</p>}
 
           {guest.length > 0 && !responseReceived && (
             <div className="mt-6 p-8 rounded-lg shadow-xl space-y-8">
@@ -186,7 +191,7 @@ const RSVPForm = () => {
                 {guest.map((g) => (
                   <div
                     key={g.id}
-                    className="flex flex-col sm:flex-row sm:items-start rounded-lg p-6 space-y-6 sm:space-x-8 sm:space-y-0"
+                    className="flex flex-col sm:flex-row sm:items-start rounded-lg p-6 space-y-6 sm:space-x-8 sm:space-y-0 relative"
                   >
                     <div className="flex justify-start items-center">
                       <input
@@ -221,8 +226,8 @@ const RSVPForm = () => {
                       type="email"
                       id={`email-${g.id}`}
                       htmlFor={`email-${g.id}`}
-                      value={guestEmails[g.id] || ""} // Get the email for each specific guest
-                      onChange={(e) => handleEmailChange(e, g.id)} // Pass the guest id to handle email change
+                      value={guestEmails[g.id] || ""}
+                      onChange={(e) => handleEmailChange(e, g.id)}
                       className="text-xl sm:text-xl w-full bg-transparent border-none text-white placeholder-gray-400 focus:outline-none"
                     />
 
@@ -237,7 +242,9 @@ const RSVPForm = () => {
                         onClick={() =>
                           handleResponse(g.id, "accept", guestEmails[g.id])
                         }
-                        disabled={selectedGuestId !== g.id}
+                        disabled={
+                          selectedGuestId !== g.id || loadingGuests[g.id]
+                        }
                       >
                         Yes
                       </button>
@@ -252,22 +259,13 @@ const RSVPForm = () => {
                         onClick={() =>
                           handleResponse(g.id, "decline", guestEmails[g.id])
                         }
-                        disabled={selectedGuestId !== g.id}
+                        disabled={
+                          selectedGuestId !== g.id || loadingGuests[g.id]
+                        }
                       >
                         No
                       </button>
                     </div>
-
-                    {loadingGuests[g.id] && (
-                      <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-                        <div className="text-center text-2xl font-bold text-white p-6 sm:p-8 rounded-lg bg-black bg-opacity-75 shadow-lg w-full max-w-xs sm:max-w-md">
-                          <BounceLoader color="#ffffff" size={50} />
-                          <p className="text-lg sm:text-2xl mt-4">
-                            Sending response... Please wait
-                          </p>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -275,19 +273,40 @@ const RSVPForm = () => {
           )}
 
           {responseReceived && (
-            <ResponseMessage
-              message="Thank you for your response!"
-              isAttending={isAttending}
-            />
-          )}
+            <>
+              <ResponseMessage
+                message="Thank you for your response!"
+                isAttending={isAttending}
+              />
 
-          {responseReceived && (
-            <div className="mt-6">
-              <Button label="Search Again" onClick={resetSearch} />
-            </div>
+              {isAttending && showAddNameModal && (
+                <AddName
+                  mainGuestId={selectedGuestId} // Keep mainGuestId until modal closes
+                  onGuestAdded={() => setShowAddNameModal(false)}
+                />
+              )}
+
+              {!showAddNameModal && (
+                <div className="mt-6">
+                  <Button label="Search Again" onClick={resetSearch} />
+                </div>
+              )}
+            </>
           )}
         </form>
       </div>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

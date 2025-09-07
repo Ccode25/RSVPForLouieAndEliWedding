@@ -128,3 +128,44 @@ INSERT INTO guestlist (guest) VALUES
 UPDATE guestList
 SET response = 'accept'  -- new response
 WHERE guest = 'Melny Ibarra' AND email = 'melny@example.com';
+
+
+-- Clear existing data
+TRUNCATE TABLE guestList RESTART IDENTITY;
+
+-- Insert cleaned guest names
+INSERT INTO guestList (guest, email, response) VALUES
+('Armando Tabelisma', '', ''),
+('Mark Angelo Tabelisma', '', ''),
+('Dylan Angelo Tabelisma', '', ''),
+('Sean Martin Andrei Tabelisma', '', ''),
+('Hailie Nicole Kristlene Tabelisma', '', ''),
+('Kharllo Miguel Pernetes', '', ''),
+('Patrick Anthony Dominguez', '', ''),
+('Melny Daelo', '', ''),
+('Aeron Jake Daelo', '', ''),
+('Khristian Paul Pimentel', '', ''),
+('John Curt Pascual', '', ''),
+('Katrina Caña', '', ''),
+('John Carlos Cuadra', '', ''),
+('Kyle Phillip Laconsay', '', ''),
+('Angelo Cordero', '', ''),
+('Urberto Bulatao', '', ''),
+('Marc Sharmyn Sacayanan', '', ''),
+('John Carlo Blance', '', ''),
+('Mark Jonh Bautista', '', ''),
+('Emilio Belmonte', '', ''),
+('Ma.Theresa Belmonte', '', ''),
+('Lorna Almondia', '', ''),
+('Glorina Villaluz', '', ''),
+('Marita Tamayosa', '', ''),
+('Isagani Tamayosa', '', ''),
+('Conchita Zurita', '', ''),
+('Leslito Zurita', '', ''),
+('Noelbert Gumadlas', '', ''),
+('Francis Pablo', '', ''),
+('Neil Christian Valderama', '', ''),
+('Charles Joshua Carillio', '', ''),
+('Rowena Pangalanan', '', ''),
+('Cristina Malabanan', '', '');
+

@@ -189,6 +189,58 @@ app.get("/response", async (req, res) => {
   }
 });
 
+app.post("/test", (req, res) => {
+  console.log("POST /test hit", req.body);
+  res.json({ success: true, body: req.body });
+});
+
+app.all("*", (req, res) => {
+  console.log("Hit unknown route:", req.method, req.url);
+  res.status(404).json({ error: "Route not found" });
+});
+
+// Add guest
+app.post("/addName", async (req, res) => {
+  console.log("POST /addName hit");
+  const { guestName } = req.body;
+
+  // Validate input
+  if (!guestName || guestName.trim() === "") {
+    return sendError(res, 400, "Guest name is required.");
+  }
+
+  try {
+    // Check if guest already exists (case-insensitive, partial match)
+    const { data: existingGuest, error: checkError } = await supabase
+      .from("guestlist")
+      .select("id")
+      .ilike("guest", `%${guestName.trim()}%`);
+
+    if (checkError) throw new Error(checkError.message);
+
+    if (existingGuest.length > 0) {
+      return sendError(res, 409, "Guest already exists.");
+    }
+
+    // Insert new guest
+    const { data, error } = await supabase
+      .from("guestlist")
+      .insert([{ guest: guestName.trim(), response: "", email: "" }])
+      .select("id, guest");
+
+    if (error) throw new Error(error.message);
+
+    res.status(201).json({
+      success: true,
+      message: "Guest added successfully.",
+      ...data[0],
+    });
+  } catch (error) {
+    console.error("Error adding guest:", error);
+    sendError(res, 500, "An error occurred while adding the guest.");
+  }
+});
+
 // Accept a guest
 app.post("/guest/accept", (req, res) =>
   handleGuestResponse(req, res, "accept")
