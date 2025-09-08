@@ -9,9 +9,12 @@
   "routes": [
     { "src": "/guest", "dest": "/index.js" },
     { "src": "/guest/accept", "dest": "/index.js" },
-    { "src": "/guest/decline", "dest": "/index.js" },
-    { "src": "/guest/addName", "dest": "/index.js" },
-    { "src": "/response", "dest": "/index.js" }
+    { "src": "/response/accept", "dest": "/index.js" },
+    { "src": "/response/decline", "dest": "/index.js" },
+    { "src": "/guest/addPlusOne", "dest": "/index.js" },
+    { "src": "/guest/add", "dest": "/index.js" },
+    { "src": "/response", "dest": "/index.js" },
+    { "src": "/response/:id", "dest": "/index.js" }
   ],
   "env": {
     "SUPABASE_URL": "https://scqjtfbailkhkjkggujx.supabase.co",

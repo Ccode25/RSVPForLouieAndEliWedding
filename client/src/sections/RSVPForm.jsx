@@ -105,7 +105,9 @@ const RSVPForm = () => {
     }
 
     const url =
-      action === "accept" ? `${URL}/guest/accept` : `${URL}/guest/decline`;
+      action === "accept"
+        ? `${URL}/response/accept`
+        : `${URL}/response/decline`;
 
     try {
       setLoadingGuests((prev) => ({ ...prev, [id]: true }));
