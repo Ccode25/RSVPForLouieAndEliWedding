@@ -171,14 +171,27 @@ app.post("/response/decline", (req, res) =>
 );
 
 // Add plus-one
-app.post("/guest/addPLusOne", async (req, res) => {
-  const { guestName } = req.body;
+app.post("/guest/addPlusOne", async (req, res) => {
+  const { guestName, mainGuestId } = req.body;
 
   if (!guestName || guestName.trim() === "") {
     return res.status(400).json({ error: "Guest name is required." });
   }
 
+  if (!mainGuestId) {
+    return res.status(400).json({ error: "Main guest ID is required." });
+  }
+
   try {
+    // Fetch main guest info
+    const { data: mainGuest, error: fetchError } = await supabase
+      .from("guestlist")
+      .select("email")
+      .eq("id", mainGuestId)
+      .single();
+
+    if (fetchError) throw new Error(fetchError.message);
+
     // Check for duplicates
     const { data: existingGuest, error: checkError } = await supabase
       .from("guestlist")
@@ -191,31 +204,32 @@ app.post("/guest/addPLusOne", async (req, res) => {
       return res.status(409).json({ error: "Guest already exists." });
     }
 
-    // Insert new guest with default "pending" response
+    // Insert new guest with inherited email and auto "accept"
     const { data, error } = await supabase
       .from("guestlist")
       .insert([
         {
           guest: guestName.trim(),
-          response: "",
+          email: mainGuest.email, // inherit email
+          response: "accept", // auto accept
           responded_at: new Date().toLocaleString("en-PH", {
             timeZone: "Asia/Manila",
           }),
         },
       ])
-      .select("id, guest, response");
+      .select("id, guest, email, response, responded_at");
 
     if (error) throw new Error(error.message);
 
     res.status(201).json({
       success: true,
-      message: `Guest "${guestName}" added successfully.`,
+      message: `Plus-one "${guestName}" added successfully.`,
       ...data[0],
     });
   } catch (error) {
-    console.error("Error adding guest:", error);
+    console.error("Error adding plus-one guest:", error);
     res.status(500).json({
-      error: "An error occurred while adding the guest.",
+      error: "An error occurred while adding the plus-one guest.",
     });
   }
 });
