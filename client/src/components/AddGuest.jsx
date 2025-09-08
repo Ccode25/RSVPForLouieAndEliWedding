@@ -21,7 +21,7 @@ const AddGuest = ({ onGuestAdded }) => {
 
     setLoading(true);
     try {
-      const res = await axios.post(`${URL}/guest/addPlusOne`, {
+      const res = await axios.post(`${URL}/guest/add`, {
         guestName,
         email,
       });

@@ -16,14 +16,14 @@ const Response = () => {
   const [acceptedGuests, setAcceptedGuests] = useState(0);
   const [declinedGuests, setDeclinedGuests] = useState(0);
   const [hideTop, setHideTop] = useState(false);
-
   const [editingGuest, setEditingGuest] = useState(null);
   const [newResponse, setNewResponse] = useState("");
 
-  // const URL = "http://localhost:5000";
-  const URL = "https://rsvp-for-louie-and-eli-wedding-lraj.vercel.app";
+  // Use your Vercel deployment URL here
+  const URL = "http://localhost:5000"; // change for production
+  // const URL = "https://rsvp-for-louie-and-eli-wedding-lraj.vercel.app";
 
-  // Login
+  // Login handler
   const handleLogin = (e, email, password) => {
     e.preventDefault();
     setError("");
@@ -36,16 +36,17 @@ const Response = () => {
     }
   };
 
+  // Filter change
   const handleFilterChange = (e) => setFilter(e.target.value);
 
-  // Fetch guests
+  // Fetch all guest responses
   const fetchGuestList = async () => {
     setLoading(true);
     setError("");
     try {
-      const response = await axios.get(`${URL}/response`);
-      setGuestList(response.data);
-      updateGuestCounts(response.data);
+      const res = await axios.get(`${URL}/response`);
+      setGuestList(res.data);
+      updateGuestCounts(res.data);
     } catch (err) {
       setError("Failed to fetch guest list.");
       console.error("API Error:", err);
@@ -58,32 +59,38 @@ const Response = () => {
     if (isLoggedIn) fetchGuestList();
   }, [isLoggedIn]);
 
+  // Update guest stats
   const updateGuestCounts = (guests) => {
     setTotalGuests(guests.length);
     setAcceptedGuests(guests.filter((g) => g.response === "accept").length);
     setDeclinedGuests(guests.filter((g) => g.response === "decline").length);
   };
 
+  // Filtered guests
   const filteredGuests = guestList
     .filter((g) => filter === "all" || g.response === filter)
     .sort((a, b) => new Date(b.responded_at) - new Date(a.responded_at));
 
+  // Handle new guest added
   const handleGuestAdded = (newGuest) => {
     setGuestList((prev) => [newGuest, ...prev]);
     updateGuestCounts([newGuest, ...guestList]);
   };
 
+  // Scroll listener
   useEffect(() => {
     const handleScroll = () => setHideTop(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Edit modal
   const openEditModal = (guest) => {
     setEditingGuest(guest);
     setNewResponse(guest.response || "");
   };
 
+  // Save guest response
   const handleSaveResponse = async () => {
     if (!newResponse) {
       toast.error("Please select a response before saving.");
@@ -97,7 +104,11 @@ const Response = () => {
 
       const updatedGuests = guestList.map((g) =>
         g.id === editingGuest.id
-          ? { ...g, response: newResponse, responded_at: new Date() }
+          ? {
+              ...g,
+              response: newResponse,
+              responded_at: new Date().toISOString(),
+            }
           : g
       );
 
@@ -111,6 +122,7 @@ const Response = () => {
     }
   };
 
+  // Delete guest response
   const handleDeleteResponse = async (guestId) => {
     try {
       await axios.delete(`${URL}/response/${guestId}`);
@@ -118,7 +130,6 @@ const Response = () => {
       setGuestList(updatedGuests);
       updateGuestCounts(updatedGuests);
       toast.success("Response deleted successfully!");
-      // Close modal if deleted guest is currently open
       if (editingGuest && editingGuest.id === guestId) setEditingGuest(null);
     } catch (err) {
       console.error("Error deleting response:", err);
@@ -182,7 +193,6 @@ const Response = () => {
                   </div>
                 </div>
 
-                {/* Add Guest + Filter */}
                 <div className="mt-4 flex flex-col sm:flex-row sm:justify-between gap-3">
                   <div className="w-full sm:w-auto">
                     <AddGuest
@@ -190,7 +200,6 @@ const Response = () => {
                       className="w-full"
                     />
                   </div>
-
                   <select
                     className="w-full sm:w-auto bg-white text-gray-700 text-center p-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-[#122029]"
                     value={filter}
@@ -223,7 +232,7 @@ const Response = () => {
                     {filteredGuests.length > 0 ? (
                       filteredGuests.map((guest, index) => (
                         <tr
-                          key={index}
+                          key={guest.id}
                           className={`${
                             index % 2 === 0 ? "bg-gray-50" : "bg-white"
                           } hover:bg-[#122029]/10 transition-colors`}
@@ -294,7 +303,6 @@ const Response = () => {
             <h3 className="text-lg font-bold mb-4">
               Edit Response for {editingGuest.guest}
             </h3>
-
             <select
               value={newResponse}
               onChange={(e) => setNewResponse(e.target.value)}

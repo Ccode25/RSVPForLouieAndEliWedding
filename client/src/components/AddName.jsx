@@ -36,7 +36,7 @@ const AddName = ({ mainGuestId, onGuestAdded }) => {
       // });
 
       const response = await axios.post(
-        "https://rsvp-for-louie-and-eli-wedding-lraj.vercel.app/guest/addPlusOne",
+        "https://rsvp-for-louie-and-eli-wedding-lraj.vercel.app/guest/add",
         {
           guestName: guestName.trim(),
           mainGuestId, // associate with main guest
