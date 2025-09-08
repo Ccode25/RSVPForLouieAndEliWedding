@@ -10,6 +10,8 @@ const AddName = ({ mainGuestId, onGuestAdded }) => {
   const [wantsToAddGuest, setWantsToAddGuest] = useState(null); // null = not chosen yet
   const [validGuestId, setValidGuestId] = useState(false);
 
+  const URL = "";
+
   useEffect(() => {
     if (mainGuestId) {
       setValidGuestId(true);
@@ -36,7 +38,7 @@ const AddName = ({ mainGuestId, onGuestAdded }) => {
       // });
 
       const response = await axios.post(
-        "https://rsvp-for-louie-and-eli-wedding-lraj.vercel.app/guest/add",
+        "https://rsvp-for-louie-and-eli-wedding-lraj.vercel.app/guest/addPlusOne",
         {
           guestName: guestName.trim(),
           mainGuestId, // associate with main guest
