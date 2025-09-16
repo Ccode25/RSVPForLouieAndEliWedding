@@ -20,14 +20,14 @@ const Response = () => {
   const [newResponse, setNewResponse] = useState("");
 
   // Use your Vercel deployment URL here
-  const URL = "http://localhost:5000"; // change for production
-  // const URL = "https://rsvp-for-louie-and-eli-wedding-lraj.vercel.app";
+  // const URL = "http://localhost:5000"; // change for production
+  const URL = "https://rsvp-for-louie-and-eli-wedding-lraj.vercel.app";
 
   // Login handler
   const handleLogin = (e, email, password) => {
     e.preventDefault();
     setError("");
-    if (email === "LOUIEELIZA" && password === "LOUIEELIZA121325") {
+    if (email === "LOUIEELI" && password === "LOUIELI121325") {
       setIsLoggedIn(true);
       toast.success("Login successful!");
     } else {

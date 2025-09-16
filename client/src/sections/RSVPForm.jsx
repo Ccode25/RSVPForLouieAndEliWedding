@@ -39,10 +39,15 @@ const RSVPForm = () => {
     "Mark Jonh Bautista",
     "Lorna Almondia",
     "Glorina Villaluz",
-    "Marita Tamayosa",
     "Conchita Zurita",
     "Rowena Pangalanan",
     "Cristina Malabanan",
+    "Mae Ann Cruz",
+    "Arthur Sanclaria",
+    "Emilio Perez Sr",
+    "Maricel Ramos",
+    "Mary Jane Saboriendo",
+    "Tricia Oca",
   ];
 
   // --- Search Guest ---
